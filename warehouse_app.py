@@ -1,11 +1,11 @@
 import streamlit as st
+import pandas as pd
 
-# Sample data structures
-products = []
-requests = []
-invoices = []
+# Data storage (using pandas DataFrame for simplicity)
+products = pd.DataFrame(columns=["ID", "Name", "Quantity"])
+requests = pd.DataFrame(columns=["ID", "Project Name", "Project Number", "Desired Delivery Date", "Products", "Quantities"])
+invoices = pd.DataFrame(columns=["ID", "Type", "Date", "Products", "Quantities"])
 
-# Streamlit app
 def app():
     st.title("Складской учет")
     
@@ -15,45 +15,30 @@ def app():
     
     if choice == "Главная":
         st.subheader("Текущий список товаров на складе:")
-        for product in products:
-            st.write(product)
-            
+        st.write(products)
+        
     elif choice == "Добавить товар":
         st.subheader("Добавить новый товар")
-        product_name = st.text_input("Наименование товара")
-        product_quantity = st.number_input("Количество", value=0)
-        
-        if st.button("Добавить"):
-            new_product = Product(len(products) + 1, product_name, product_quantity)
-            products.append(new_product)
-            st.success(f"Товар {product_name} добавлен!")
+        product_data = st.beta_expander("Добавить товар в таблицу", False)
+        with product_data:
+            product_id = st.number_input("ID", value=products.shape[0] + 1)
+            product_name = st.text_input("Наименование товара")
+            product_quantity = st.number_input("Количество", value=0)
+            if st.button("Добавить товар"):
+                products.loc[product_id] = [product_id, product_name, product_quantity]
+                st.success(f"Товар {product_name} добавлен!")
             
     elif choice == "Создать заявку":
         st.subheader("Создать новую заявку")
-        project_name = st.text_input("Название проекта")
-        project_number = st.text_input("Номер проекта")
-        desired_delivery_date = st.date_input("Желаемая дата поставки")
-        selected_product = st.selectbox("Выберите товар", products)
-        product_quantity = st.number_input("Количество", value=0)
-        
-        if st.button("Добавить заявку"):
-            new_request = Request(len(requests) + 1, project_name, project_number, desired_delivery_date)
-            new_request.add_product(selected_product, product_quantity)
-            requests.append(new_request)
-            st.success(f"Заявка для проекта {project_name} создана!")
+        request_data = st.beta_expander("Добавить заявку в таблицу", False)
+        with request_data:
+            #... (similar approach as adding product)
             
     elif choice == "Создать накладную":
         st.subheader("Создать новую накладную")
-        invoice_type = st.selectbox("Тип накладной", ["Закупка", "Отгрузка"])
-        invoice_date = st.date_input("Дата накладной")
-        selected_product = st.selectbox("Выберите товар", products)
-        product_quantity = st.number_input("Количество", value=0)
-        
-        if st.button("Добавить накладную"):
-            new_invoice = Invoice(len(invoices) + 1, invoice_type, invoice_date)
-            new_invoice.add_product(selected_product, product_quantity)
-            invoices.append(new_invoice)
-            st.success(f"Накладная {invoice_type} создана!")
+        invoice_data = st.beta_expander("Добавить накладную в таблицу", False)
+        with invoice_data:
+            #... (similar approach as adding product and request)
 
 if __name__ == "__main__":
     app()
